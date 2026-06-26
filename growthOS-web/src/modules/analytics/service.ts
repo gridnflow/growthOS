@@ -1,9 +1,15 @@
 import * as analyticsRepository from './repository'
 import type {
+  DashboardSummary,
   SessionAggregates,
   SessionAggregatesInput,
   SessionTaskBreakdown,
 } from './types'
+
+function toPercent(done: number, total: number): number {
+  if (total === 0) return 0
+  return Math.round((done / total) * 100)
+}
 
 function toDayKey(date: Date): string {
   const d = new Date(date)
@@ -39,8 +45,7 @@ async function computeStreak(userId: string, sessionDate: Date): Promise<number>
 
 async function computeProgress(goalId: string): Promise<number> {
   const { done, total } = await analyticsRepository.countGoalTasksByStatus(goalId)
-  if (total === 0) return 0
-  return Math.round((done / total) * 100)
+  return toPercent(done, total)
 }
 
 export async function getSessionAggregates(
@@ -53,4 +58,29 @@ export async function getSessionAggregates(
   ])
 
   return { ...breakdown, streakCount, progressPercentage }
+}
+
+export async function getWeeklyFocusedHours(userId: string): Promise<number> {
+  const sec = await analyticsRepository.sumFocusedSecThisWeek(userId, new Date())
+  return Math.round(sec / 3600)
+}
+
+export async function getDashboardSummary(userId: string): Promise<DashboardSummary> {
+  const now = new Date()
+  const [currentStreak, todaySec, weekSec, activeGoalsCount, userTasks] =
+    await Promise.all([
+      computeStreak(userId, now),
+      analyticsRepository.sumFocusedSecToday(userId, now),
+      analyticsRepository.sumFocusedSecThisWeek(userId, now),
+      analyticsRepository.countActiveGoals(userId),
+      analyticsRepository.countUserTasksByStatus(userId),
+    ])
+
+  return {
+    currentStreak,
+    todayFocusedMin: Math.round(todaySec / 60),
+    weekFocusedMin: Math.round(weekSec / 60),
+    activeGoalsCount,
+    overallProgressPct: toPercent(userTasks.done, userTasks.total),
+  }
 }

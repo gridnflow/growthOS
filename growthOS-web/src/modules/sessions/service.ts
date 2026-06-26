@@ -25,6 +25,7 @@ export async function endSession(input: EndSessionInput) {
     goalId: session.goalId,
     sessionDate: session.startedAt,
   })
+  const totalHoursThisWeek = await analyticsService.getWeeklyFocusedHours(session.userId)
 
   // Run AI pipeline — each step is independent; a failure doesn't abort the rest
   let reflection = null
@@ -43,7 +44,7 @@ export async function endSession(input: EndSessionInput) {
         reflection: reflectionOutput,
         goalTitle: goal.title,
         streakCount: aggregates.streakCount,
-        totalHoursThisWeek: Math.round(input.durationSec / 3600),
+        totalHoursThisWeek,
         progressPercentage: aggregates.progressPercentage,
       })
       await sessionRepository.saveLinkedInPost(session.id, contentOutput)

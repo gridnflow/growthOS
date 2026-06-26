@@ -14,3 +14,11 @@ export type SessionAggregatesInput = {
   // Anchors the day window and the streak's most recent day.
   sessionDate: Date
 }
+
+export type DashboardSummary = {
+  currentStreak: number
+  todayFocusedMin: number
+  weekFocusedMin: number
+  activeGoalsCount: number
+  overallProgressPct: number
+}
