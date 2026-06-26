@@ -3,6 +3,7 @@ import { runContentCreatorAgent } from '@/modules/ai-agents/contentCreator'
 import { runReelsGeneratorAgent } from '@/modules/ai-agents/reelsGenerator'
 import * as sessionRepository from './repository'
 import * as goalRepository from '@/modules/goals/repository'
+import * as analyticsService from '@/modules/analytics/service'
 import type { StartSessionInput, EndSessionInput } from './types'
 
 export async function startSession(input: StartSessionInput) {
@@ -19,13 +20,19 @@ export async function endSession(input: EndSessionInput) {
     .slice(0, 3)
     .map((a) => a.app)
 
+  const aggregates = await analyticsService.getSessionAggregates({
+    userId: session.userId,
+    goalId: session.goalId,
+    sessionDate: session.startedAt,
+  })
+
   // Run AI pipeline — each step is independent; a failure doesn't abort the rest
   let reflection = null
   try {
     const reflectionOutput = await runReflectionAgent({
       durationSeconds: input.durationSec,
-      tasksCompleted: [],
-      tasksSkipped: [],
+      tasksCompleted: aggregates.tasksCompleted,
+      tasksSkipped: aggregates.tasksSkipped,
       appsUsed: input.activityLog,
       goalContext: goal.title,
     })
@@ -35,9 +42,9 @@ export async function endSession(input: EndSessionInput) {
       const contentOutput = await runContentCreatorAgent({
         reflection: reflectionOutput,
         goalTitle: goal.title,
-        streakCount: 1,
+        streakCount: aggregates.streakCount,
         totalHoursThisWeek: Math.round(input.durationSec / 3600),
-        progressPercentage: 0,
+        progressPercentage: aggregates.progressPercentage,
       })
       await sessionRepository.saveLinkedInPost(session.id, contentOutput)
     } catch {
@@ -48,9 +55,9 @@ export async function endSession(input: EndSessionInput) {
       const reelsOutput = await runReelsGeneratorAgent({
         sessionStats: {
           durationSeconds: input.durationSec,
-          tasksCompleted: [],
+          tasksCompleted: aggregates.tasksCompleted,
           topApps,
-          streakCount: 1,
+          streakCount: aggregates.streakCount,
         },
         reflection: {
           keyInsight: reflectionOutput.keyInsight,
