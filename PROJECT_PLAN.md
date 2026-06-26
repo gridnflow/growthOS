@@ -363,7 +363,7 @@ model Session {
   user           User       @relation(fields: [userId], references: [id])
   goal           Goal       @relation(fields: [goalId], references: [id])
   reflection     Reflection?
-  linkedinPost   LinkedInPost?
+  linkedInPost   LinkedInPost?
   reel           Reel?
 }
 

@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: growthos-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: growthos
+    ports:
+      # Host 5432 is occupied by another process on this machine, so the
+      # container is published on 5433. DATABASE_URL must match this port.
+      - "5433:5432"
+    volumes:
+      - growthos-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d growthos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  growthos-pgdata:
