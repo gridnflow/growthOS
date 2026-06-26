@@ -12,18 +12,11 @@ type Task = {
 type StartSessionResponse = { sessionId: string }
 
 class ApiClient {
-  private token: string | null = process.env.CLERK_TOKEN ?? null
-
-  setToken(token: string): void {
-    this.token = token
-  }
-
   private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const res = await fetch(`${BASE_URL}${path}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
         ...options.headers,
       },
     })

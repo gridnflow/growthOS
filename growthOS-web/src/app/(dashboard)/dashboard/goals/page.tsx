@@ -1,5 +1,9 @@
-import { getInternalUserId } from '@/lib/clerk'
+import { getCurrentUserId } from '@/lib/currentUser'
 import * as goalsService from '@/modules/goals/service'
+
+// Render per request against live DB state (no auth() to force dynamic anymore).
+export const dynamic = 'force-dynamic'
+
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -31,7 +35,7 @@ function DDayBadge({ deadline }: { deadline: Date }) {
 }
 
 export default async function GoalsPage() {
-  const userId = await getInternalUserId()
+  const userId = await getCurrentUserId()
   const goals = userId ? await goalsService.getGoals(userId) : []
 
   return (

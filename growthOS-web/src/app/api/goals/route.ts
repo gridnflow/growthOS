@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as goalService from '@/modules/goals/service'
-import { getUserId } from '@/lib/clerk'
+import { getCurrentUserId } from '@/lib/currentUser'
 
-export async function GET(req: NextRequest) {
-  const userId = getUserId(req)
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET() {
+  const userId = await getCurrentUserId()
+  if (!userId) return NextResponse.json({ error: 'No user configured' }, { status: 500 })
 
   const goals = await goalService.getGoals(userId)
   return NextResponse.json(goals)
 }
 
 export async function POST(req: NextRequest) {
-  const userId = getUserId(req)
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const userId = await getCurrentUserId()
+  if (!userId) return NextResponse.json({ error: 'No user configured' }, { status: 500 })
 
   const body = await req.json() as {
     title: string

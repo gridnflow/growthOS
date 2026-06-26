@@ -1,5 +1,10 @@
 import Link from 'next/link'
-import { getInternalUserId } from '@/lib/clerk'
+import { getCurrentUserId } from '@/lib/currentUser'
+
+// Dashboard reflects live DB state per request; without auth() forcing this,
+// declare it explicitly so the page isn't statically prerendered at build time.
+export const dynamic = 'force-dynamic'
+
 import * as analyticsService from '@/modules/analytics/service'
 import * as goalsService from '@/modules/goals/service'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -12,7 +17,7 @@ import { statusTone } from '@/components/ui/statusTone'
 import { formatMinutes } from '@/lib/format'
 
 export default async function DashboardPage() {
-  const userId = await getInternalUserId()
+  const userId = await getCurrentUserId()
   if (!userId) {
     return (
       <>

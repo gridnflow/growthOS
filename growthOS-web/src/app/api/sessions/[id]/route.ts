@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import * as sessionService from '@/modules/sessions/service'
-import { getUserId } from '@/lib/clerk'
+import { getCurrentUserId } from '@/lib/currentUser'
 
 export async function GET(
-  req: NextRequest,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const userId = getUserId(req)
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const userId = await getCurrentUserId()
+  if (!userId) return NextResponse.json({ error: 'No user configured' }, { status: 500 })
 
   const { id } = await params
   const session = await sessionService.getSession(id)

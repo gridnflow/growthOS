@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { UserButton } from '@clerk/nextjs'
 import { SidebarNav } from '@/components/SidebarNav'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -14,11 +13,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="md:pl-56">
-        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-8 py-4">
-          <SidebarNav className="flex gap-1 overflow-x-auto md:hidden" />
-          <div className="ml-auto">
-            <UserButton />
-          </div>
+        <header className="border-b border-gray-200 bg-white px-8 py-4 md:hidden">
+          <SidebarNav className="flex gap-1 overflow-x-auto" />
         </header>
 
         <main className="mx-auto max-w-6xl px-8 py-8">{children}</main>

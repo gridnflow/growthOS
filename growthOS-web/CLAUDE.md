@@ -9,7 +9,7 @@
 **웹 대시보드 + API 백엔드 통합.** Electron이 보내는 세션 데이터를 받아 AI 파이프라인을 실행하고, 결과를 저장 및 표시한다.
 
 이 레포가 하는 일:
-1. 사용자 인증 (Clerk)
+1. 고정 사용자 컨텍스트 제공 (인증 없음 — 단일 사용자 앱)
 2. 목표 관리 (Goal Planner + Task Breakdown Agent)
 3. 세션 데이터 수신 및 저장
 4. AI 파이프라인 실행 (5개 에이전트)
@@ -23,7 +23,7 @@
 - Next.js 15 (App Router, Server Components 기본)
 - TypeScript (strict)
 - Prisma ORM + PostgreSQL
-- Clerk (인증)
+- 인증 없음 (단일 사용자, lib/currentUser.ts의 고정 사용자)
 - OpenAI SDK (GPT-4.1)
 - Tailwind CSS
 - Sentry (에러 모니터링)
@@ -79,7 +79,7 @@ growthOS-web/
 │   └── lib/
 │       ├── prisma.ts               ← Prisma 클라이언트 싱글턴
 │       ├── openai.ts               ← OpenAI 클라이언트 싱글턴
-│       └── clerk.ts                ← Clerk 서버 헬퍼
+│       └── currentUser.ts          ← 고정 사용자 조회 (인증 없음)
 ├── prisma/
 │   └── schema.prisma
 └── .env.local
@@ -212,8 +212,8 @@ SENTRY_DSN=
 
 ## Electron에서 오는 요청 처리 주의
 
-- Electron은 Clerk 세션 쿠키가 없다 → Bearer 토큰 방식 사용
-- API Route에서 `auth()` 대신 `getAuth()` + `request.headers` 방식 필요 (Clerk 문서 확인)
+- 인증 없음 → 토큰/헤더 검증 없이 처리. 모든 요청은 `lib/currentUser.ts`의 고정 사용자로 귀속.
+- API Route는 `getCurrentUserId()`로 사용자 컨텍스트를 얻는다.
 - CORS: `localhost:*`에서 오는 Electron 요청 허용 (dev 환경)
 
 ---

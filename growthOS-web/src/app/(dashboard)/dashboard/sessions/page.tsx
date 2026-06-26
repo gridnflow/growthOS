@@ -1,5 +1,9 @@
-import { getInternalUserId } from '@/lib/clerk'
+import { getCurrentUserId } from '@/lib/currentUser'
 import * as sessionsService from '@/modules/sessions/service'
+
+// Render per request against live DB state (no auth() to force dynamic anymore).
+export const dynamic = 'force-dynamic'
+
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -8,7 +12,7 @@ import type { SessionRowView } from '@/components/ui/SessionRow'
 import { formatDuration, formatDateTime } from '@/lib/format'
 
 export default async function SessionsPage() {
-  const userId = await getInternalUserId()
+  const userId = await getCurrentUserId()
   const { sessions, summary } = userId
     ? await sessionsService.getRecentSessions(userId)
     : { sessions: [], summary: { totalSessions: 0, totalFocusSec: 0 } }

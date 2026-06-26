@@ -1,5 +1,9 @@
-import { getInternalUserId } from '@/lib/clerk'
+import { getCurrentUserId } from '@/lib/currentUser'
 import * as contentService from '@/modules/content/service'
+
+// Render per request against live DB state (no auth() to force dynamic anymore).
+export const dynamic = 'force-dynamic'
+
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ContentTabs } from '@/components/ContentTabs'
 import type { PostCardView } from '@/components/ui/PostCard'
@@ -7,7 +11,7 @@ import type { ReelCardView } from '@/components/ui/ReelCard'
 import { formatDate } from '@/lib/format'
 
 export default async function ContentPage() {
-  const userId = await getInternalUserId()
+  const userId = await getCurrentUserId()
   const { posts, reels } = userId
     ? await contentService.getContentItems(userId)
     : { posts: [], reels: [] }

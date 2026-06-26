@@ -24,7 +24,7 @@ growthOS/
 |------|------|
 | 레포 | 2개 분리 (electron / web) |
 | DB | PostgreSQL (로컬 Docker → 이후 Neon) |
-| Auth | Clerk |
+| Auth | 없음 (단일 사용자 앱, 추후 재도입 가능) |
 | AI 모델 | OpenAI GPT-4.1 (전부) |
 | 영상 저장 | 로컬 파일시스템 (POC), S3/R2는 이후 |
 | FFmpeg | Electron에 번들, 로컬 실행 |
@@ -41,7 +41,7 @@ growthOS/
 - **Frontend:** Next.js 15 (App Router), React, Electron (electron-vite)
 - **Backend:** Node.js TypeScript (Next.js API Routes)
 - **DB:** PostgreSQL + Prisma ORM
-- **Auth:** Clerk
+- **Auth:** 없음 (단일 사용자, 고정 사용자로 동작)
 - **AI:** OpenAI GPT-4.1
 - **영상:** FFmpeg, Remotion, Whisper
 - **Queue:** BullMQ + Redis (필요 시에만)
