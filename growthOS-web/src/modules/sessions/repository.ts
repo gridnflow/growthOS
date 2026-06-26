@@ -75,3 +75,20 @@ export async function findSessionById(id: string) {
     include: { reflection: true, linkedInPost: true, reel: true, goal: true },
   })
 }
+
+export async function findRecentSessionsByUser(userId: string) {
+  return prisma.session.findMany({
+    where: { userId },
+    orderBy: { endedAt: { sort: 'desc', nulls: 'first' } },
+    select: {
+      id: true,
+      startedAt: true,
+      endedAt: true,
+      durationSec: true,
+      goal: { select: { title: true } },
+      reflection: { select: { focusScore: true } },
+      linkedInPost: { select: { id: true } },
+      reel: { select: { id: true } },
+    },
+  })
+}

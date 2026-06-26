@@ -20,3 +20,20 @@ export type SessionResult = {
   linkedInPost: object | null
   reel: object | null
 }
+
+export type SessionListItem = {
+  id: string
+  startedAt: Date
+  endedAt: Date | null
+  durationSec: number | null
+  goal: { title: string }
+  hasReflection: boolean
+  focusScore: number | null
+  hasPost: boolean
+  hasReel: boolean
+}
+
+export type RecentSessions = {
+  sessions: SessionListItem[]
+  summary: { totalSessions: number; totalFocusSec: number }
+}

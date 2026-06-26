@@ -4,7 +4,12 @@ import { runReelsGeneratorAgent } from '@/modules/ai-agents/reelsGenerator'
 import * as sessionRepository from './repository'
 import * as goalRepository from '@/modules/goals/repository'
 import * as analyticsService from '@/modules/analytics/service'
-import type { StartSessionInput, EndSessionInput } from './types'
+import type {
+  StartSessionInput,
+  EndSessionInput,
+  RecentSessions,
+  SessionListItem,
+} from './types'
 
 export async function startSession(input: StartSessionInput) {
   return sessionRepository.createSession(input)
@@ -79,4 +84,28 @@ export async function endSession(input: EndSessionInput) {
 
 export async function getSession(sessionId: string) {
   return sessionRepository.findSessionById(sessionId)
+}
+
+export async function getRecentSessions(userId: string): Promise<RecentSessions> {
+  const rows = await sessionRepository.findRecentSessionsByUser(userId)
+
+  const sessions: SessionListItem[] = rows.map((row) => ({
+    id: row.id,
+    startedAt: row.startedAt,
+    endedAt: row.endedAt,
+    durationSec: row.durationSec,
+    goal: { title: row.goal.title },
+    hasReflection: row.reflection !== null,
+    focusScore: row.reflection?.focusScore ?? null,
+    hasPost: row.linkedInPost !== null,
+    hasReel: row.reel !== null,
+  }))
+
+  return {
+    sessions,
+    summary: {
+      totalSessions: sessions.length,
+      totalFocusSec: sessions.reduce((sum, s) => sum + (s.durationSec ?? 0), 0),
+    },
+  }
 }
