@@ -11,10 +11,11 @@ node_modules/
 out/
 dist/
 
-# media artifacts
+# media artifacts (recorded session videos live outside the repo or are
+# ignored by growthOS-electron/.gitignore; do not blanket-ignore "sessions/"
+# here — it would also match growthOS-web/src/app/api/sessions/)
 *.mp4
 *.webm
-sessions/
 
 # misc
 .DS_Store
