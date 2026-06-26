@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GrowthOS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff; padding: 16px; }
+    h1 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+    #status { font-size: 13px; color: #888; margin-bottom: 12px; }
+    #timer { font-size: 32px; font-weight: 700; margin-bottom: 20px; color: #fff; }
+    button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #startBtn { background: #fff; color: #000; }
+    #stopBtn { background: #ff3b30; color: #fff; display: none; }
+    #tasks { margin-top: 20px; }
+    #tasks h2 { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .task { font-size: 13px; padding: 8px 0; border-bottom: 1px solid #1a1a1a; color: #ccc; }
+  </style>
+</head>
+<body>
+  <h1>GrowthOS</h1>
+  <div id="status">Ready to focus</div>
+  <div id="timer">00:00</div>
+  <button id="startBtn">Start Focus Session</button>
+  <button id="stopBtn">End Session</button>
+  <div id="tasks">
+    <h2>Today</h2>
+    <div id="taskList"></div>
+  </div>
+  <script type="module" src="./tray.js"></script>
+</body>
+</html>

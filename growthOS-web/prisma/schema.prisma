@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  clerkId      String    @unique
+  email        String    @unique
+  createdAt    DateTime  @default(now())
+  goals        Goal[]
+  sessions     Session[]
+}
+
+model Goal {
+  id         String     @id @default(cuid())
+  userId     String
+  title      String
+  deadline   DateTime
+  dailyHours Float
+  status     GoalStatus @default(ACTIVE)
+  createdAt  DateTime   @default(now())
+  user       User       @relation(fields: [userId], references: [id])
+  plans      Plan[]
+  sessions   Session[]
+}
+
+model Plan {
+  id         String   @id @default(cuid())
+  goalId     String
+  type       PlanType
+  weekNumber Int?
+  month      Int?
+  content    Json
+  createdAt  DateTime @default(now())
+  goal       Goal     @relation(fields: [goalId], references: [id])
+  tasks      Task[]
+}
+
+model Task {
+  id           String     @id @default(cuid())
+  planId       String
+  title        String
+  date         DateTime
+  estimatedMin Int
+  status       TaskStatus @default(TODO)
+  plan         Plan       @relation(fields: [planId], references: [id])
+}
+
+model Session {
+  id             String       @id @default(cuid())
+  userId         String
+  goalId         String
+  startedAt      DateTime
+  endedAt        DateTime?
+  durationSec    Int?
+  activityLog    Json?
+  videoLocalPath String?
+  user           User         @relation(fields: [userId], references: [id])
+  goal           Goal         @relation(fields: [goalId], references: [id])
+  reflection     Reflection?
+  linkedInPost   LinkedInPost?
+  reel           Reel?
+}
+
+model Reflection {
+  id              String   @id @default(cuid())
+  sessionId       String   @unique
+  accomplishments String[]
+  distractions    String[]
+  focusScore      Int
+  keyInsight      String
+  nextStep        String
+  encouragement   String
+  createdAt       DateTime @default(now())
+  session         Session  @relation(fields: [sessionId], references: [id])
+}
+
+model LinkedInPost {
+  id        String     @id @default(cuid())
+  sessionId String     @unique
+  hook      String
+  body      String
+  cta       String
+  hashtags  String[]
+  fullPost  String
+  status    PostStatus @default(DRAFT)
+  createdAt DateTime   @default(now())
+  session   Session    @relation(fields: [sessionId], references: [id])
+}
+
+model Reel {
+  id                   String     @id @default(cuid())
+  sessionId            String     @unique
+  narrationScript      String
+  overlaySequence      Json
+  hookText             String
+  ctaText              String
+  musicMood            String
+  estimatedDurationSec Int
+  localVideoPath       String?
+  status               ReelStatus @default(PENDING)
+  createdAt            DateTime   @default(now())
+  session              Session    @relation(fields: [sessionId], references: [id])
+}
+
+enum GoalStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum PlanType {
+  MONTHLY
+  WEEKLY
+  DAILY
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  SKIPPED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ReelStatus {
+  PENDING
+  PROCESSING
+  READY
+  EXPORTED
+}
