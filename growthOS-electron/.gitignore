@@ -1,6 +1,7 @@
 node_modules/
 dist/
 out/
+packaged/
 .env
 *.mp4
 *.webm
