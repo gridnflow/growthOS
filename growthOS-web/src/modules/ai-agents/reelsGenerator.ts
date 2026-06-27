@@ -1,4 +1,4 @@
-import { openai, MODEL } from '@/lib/openai'
+import { getOpenAI, MODEL } from '@/lib/openai'
 import type { ReelsGeneratorInput, ReelsGeneratorOutput } from './types'
 
 const SYSTEM_PROMPT = `You are an Instagram Reels scriptwriter for productivity content.
@@ -20,7 +20,7 @@ export async function runReelsGeneratorAgent(
 ): Promise<ReelsGeneratorOutput> {
   const durationMin = Math.round(input.sessionStats.durationSeconds / 60)
 
-  const completion = await openai.chat.completions.create({
+  const completion = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },

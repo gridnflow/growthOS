@@ -1,4 +1,4 @@
-import { openai, MODEL } from '@/lib/openai'
+import { getOpenAI, MODEL } from '@/lib/openai'
 import type { ContentCreatorInput, ContentCreatorOutput } from './types'
 
 const SYSTEM_PROMPT = `You are a "Build in Public" LinkedIn ghostwriter.
@@ -16,7 +16,7 @@ Rules:
 export async function runContentCreatorAgent(
   input: ContentCreatorInput
 ): Promise<ContentCreatorOutput> {
-  const completion = await openai.chat.completions.create({
+  const completion = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },

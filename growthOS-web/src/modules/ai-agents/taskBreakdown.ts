@@ -1,4 +1,4 @@
-import { openai, MODEL } from '@/lib/openai'
+import { getOpenAI, MODEL } from '@/lib/openai'
 import type { TaskBreakdownInput, TaskBreakdownOutput } from './types'
 
 const SYSTEM_PROMPT = `You are a productivity coach breaking down weekly goals into daily tasks.
@@ -33,7 +33,7 @@ export async function runTaskBreakdownAgent(
       ? Math.round((input.completedTasks.length / (input.completedTasks.length + 3)) * 100)
       : 100
 
-  const completion = await openai.chat.completions.create({
+  const completion = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },

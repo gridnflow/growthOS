@@ -1,4 +1,4 @@
-import { openai, MODEL } from '@/lib/openai'
+import { getOpenAI, MODEL } from '@/lib/openai'
 import type { ReflectionInput, ReflectionOutput } from './types'
 
 const SYSTEM_PROMPT = `You are an honest but encouraging growth coach generating session reflections.
@@ -21,7 +21,7 @@ export async function runReflectionAgent(
     .slice(0, 5)
     .map((a) => ({ app: a.app, minutes: Math.round(a.durationSec / 60) }))
 
-  const completion = await openai.chat.completions.create({
+  const completion = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },

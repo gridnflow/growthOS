@@ -1,4 +1,4 @@
-import { openai, MODEL } from '@/lib/openai'
+import { getOpenAI, MODEL } from '@/lib/openai'
 import type { GoalPlannerInput, GoalPlannerOutput } from './types'
 
 const SYSTEM_PROMPT = `You are a personal growth coach creating realistic monthly milestones.
@@ -30,7 +30,7 @@ export async function runGoalPlannerAgent(
     (input.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30)
   )
 
-  const completion = await openai.chat.completions.create({
+  const completion = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
