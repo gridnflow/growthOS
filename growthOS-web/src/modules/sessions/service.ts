@@ -4,11 +4,13 @@ import { runReelsGeneratorAgent } from '@/modules/ai-agents/reelsGenerator'
 import * as sessionRepository from './repository'
 import * as goalRepository from '@/modules/goals/repository'
 import * as analyticsService from '@/modules/analytics/service'
+import type { ActivityEntry } from '@/modules/ai-agents/types'
 import type {
   StartSessionInput,
   EndSessionInput,
   RecentSessions,
   SessionListItem,
+  SessionDetail,
 } from './types'
 
 export async function startSession(input: StartSessionInput) {
@@ -84,6 +86,51 @@ export async function endSession(input: EndSessionInput) {
 
 export async function getSession(sessionId: string) {
   return sessionRepository.findSessionById(sessionId)
+}
+
+export async function getSessionDetail(
+  sessionId: string,
+  userId: string
+): Promise<SessionDetail | null> {
+  const s = await sessionRepository.findSessionById(sessionId)
+  if (!s || s.userId !== userId) return null
+
+  return {
+    id: s.id,
+    startedAt: s.startedAt,
+    endedAt: s.endedAt,
+    durationSec: s.durationSec,
+    goalTitle: s.goal.title,
+    activityLog: (s.activityLog as ActivityEntry[] | null) ?? [],
+    reflection: s.reflection
+      ? {
+          accomplishments: s.reflection.accomplishments,
+          distractions: s.reflection.distractions,
+          focusScore: s.reflection.focusScore,
+          keyInsight: s.reflection.keyInsight,
+          nextStep: s.reflection.nextStep,
+          encouragement: s.reflection.encouragement,
+        }
+      : null,
+    linkedInPost: s.linkedInPost
+      ? {
+          hook: s.linkedInPost.hook,
+          body: s.linkedInPost.body,
+          cta: s.linkedInPost.cta,
+          hashtags: s.linkedInPost.hashtags,
+          fullPost: s.linkedInPost.fullPost,
+        }
+      : null,
+    reel: s.reel
+      ? {
+          narrationScript: s.reel.narrationScript,
+          hookText: s.reel.hookText,
+          ctaText: s.reel.ctaText,
+          musicMood: s.reel.musicMood,
+          estimatedDurationSec: s.reel.estimatedDurationSec,
+        }
+      : null,
+  }
 }
 
 export async function getRecentSessions(userId: string): Promise<RecentSessions> {

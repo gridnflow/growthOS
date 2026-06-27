@@ -37,3 +37,34 @@ export type RecentSessions = {
   sessions: SessionListItem[]
   summary: { totalSessions: number; totalFocusSec: number }
 }
+
+export type SessionDetail = {
+  id: string
+  startedAt: Date
+  endedAt: Date | null
+  durationSec: number | null
+  goalTitle: string
+  activityLog: ActivityEntry[]
+  reflection: {
+    accomplishments: string[]
+    distractions: string[]
+    focusScore: number
+    keyInsight: string
+    nextStep: string
+    encouragement: string
+  } | null
+  linkedInPost: {
+    hook: string
+    body: string
+    cta: string
+    hashtags: string[]
+    fullPost: string
+  } | null
+  reel: {
+    narrationScript: string
+    hookText: string
+    ctaText: string
+    musicMood: string
+    estimatedDurationSec: number
+  } | null
+}
