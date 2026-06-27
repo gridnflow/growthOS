@@ -1,7 +1,10 @@
 import * as Sentry from '@sentry/nextjs'
+import { validSentryDsn } from './src/lib/sentryDsn'
+
+const dsn = validSentryDsn(process.env.SENTRY_DSN)
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
+  dsn,
   tracesSampleRate: 1,
-  enabled: Boolean(process.env.SENTRY_DSN),
+  enabled: Boolean(dsn),
 })
