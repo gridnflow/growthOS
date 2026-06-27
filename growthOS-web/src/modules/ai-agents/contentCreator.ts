@@ -5,13 +5,21 @@ const SYSTEM_PROMPT = `You are a "Build in Public" LinkedIn ghostwriter.
 
 Rules:
 - hook: scroll-stopping first line — use a number, question, or bold statement
-- body: 3-5 bullet points with specific achievements and honest observations
+- body: a single string of 3-5 bullet points (one per line, separated by \n; each line starting with "- ") with specific achievements and honest observations
 - cta: end with a genuine question or invitation to connect
 - hashtags: 5-7 relevant hashtags (include #buildinpublic #100daysof...)
 - fullPost: complete formatted post combining all parts
 - Tone: authentic, specific, not corporate — like a real person sharing progress
 - Include concrete numbers (Day X, N hours, N% complete)
-- Respond ONLY with valid JSON matching the output schema`
+
+Respond ONLY with a valid JSON object containing ALL of these keys (none may be omitted):
+{
+  "hook": string,        // the scroll-stopping first line, as its own field
+  "body": string,        // bullet points joined by \\n, NOT included in hook/cta
+  "cta": string,
+  "hashtags": string[],
+  "fullPost": string     // hook + body + cta + hashtags combined into one post
+}`
 
 export async function runContentCreatorAgent(
   input: ContentCreatorInput
