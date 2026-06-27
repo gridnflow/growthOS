@@ -145,3 +145,17 @@ new BrowserWindow({
 - `desktopCapturer`는 macOS에서 Screen Recording 권한 필요 → 앱 시작 시 `systemPreferences.askForMediaAccess('screen')` 호출
 - FFmpeg 처리는 세션 종료 후 백그라운드에서 실행 (UI 블로킹 금지)
 - Electron main process에서 직접 무거운 연산 금지 → `worker_threads` 또는 child_process 사용
+
+## 알려진 제약 — 화면 녹화 권한 (보류)
+
+화면 녹화 코드(renderer MediaRecorder → IPC → chunk 저장)는 구현돼 있으나,
+**개발 환경에서는 화면 녹화가 동작하지 않는다.** macOS는 Screen Recording 권한을
+앱의 코드 서명(CDHash)에 묶는데, 개발용/패키징(`npm run package`) 빌드는 **ad-hoc
+서명**이라 권한이 영구 저장되지 않는다 — 토글을 켜도 앱을 재시작하면 `denied`로
+돌아가고, 앱 종료 시 권한 목록에서 항목이 사라진다. (Accessibility 권한은 더 관대해서
+ad-hoc로도 부여되며, active-win 활동 추적은 정상 동작한다.)
+
+→ **해결: 정식 Apple Developer ID 인증서로 코드 서명한 빌드에서만 화면 녹화가 동작한다.**
+그때까지 세션은 녹화 없이 동작한다 — `recorder:get-source-id`는 권한이 없으면 `null`을
+반환하고, tray는 "Session active (no recording)"으로 표시하며 활동 추적·AI 파이프라인은
+정상 진행된다. 즉 화면 녹화는 best-effort 부가 기능으로 격리돼 있다.

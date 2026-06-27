@@ -93,11 +93,6 @@ function openScreenRecordingSettings(): void {
 }
 
 app.whenReady().then(() => {
-  if (process.platform === 'darwin') {
-    console.log('[perm] screen =', systemPreferences.getMediaAccessStatus('screen'))
-    console.log('[perm] accessibility =', systemPreferences.isTrustedAccessibilityClient(false))
-  }
-
   void ensureMacPermissions()
 
   trayWindow = createTrayWindow()
