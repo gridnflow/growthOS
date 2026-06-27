@@ -32,10 +32,11 @@ export async function processSession(params: ProcessSessionParams): Promise<stri
   const listContent = chunkPaths.map((p) => `file '${p}'`).join('\n')
   fs.writeFileSync(listFile, listContent)
 
-  // Step 2: Concat chunks into raw mp4
+  // Step 2: Concat chunks into raw mp4. The chunks are webm/VP8 (MediaRecorder),
+  // which cannot be stream-copied into an mp4 container — re-encode to H.264.
   await execFileAsync(ffmpegPath, [
     '-f', 'concat', '-safe', '0', '-i', listFile,
-    '-c', 'copy', '-y', rawOutput,
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-an', '-y', rawOutput,
   ])
 
   // Step 3: Create 8x timelapse
@@ -54,10 +55,11 @@ export async function processSession(params: ProcessSessionParams): Promise<stri
     `drawtext=text='${tasksText}':fontsize=24:fontcolor=white:x=30:y=160:box=1:boxcolor=black@0.4:boxborderw=5`,
   ].join(',')
 
+  // No audio track in the screen capture, so don't try to copy one (-an).
   await execFileAsync(ffmpegPath, [
     '-i', timelapseOutput,
     '-vf', overlayFilter,
-    '-codec:a', 'copy', '-y', finalOutput,
+    '-an', '-y', finalOutput,
   ])
 
   // Cleanup intermediate files
