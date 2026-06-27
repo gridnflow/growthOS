@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import type { TaskStatus } from '@prisma/client'
 import type { CreateGoalInput } from './types'
 
 export async function createGoal(input: CreateGoalInput) {
@@ -66,4 +67,17 @@ export async function findTodayTasks(userId: string) {
     },
     include: { plan: { include: { goal: true } } },
   })
+}
+
+// Scope the update by userId so a task can only be changed by its owner.
+export async function updateTaskStatus(
+  taskId: string,
+  userId: string,
+  status: TaskStatus
+) {
+  const result = await prisma.task.updateMany({
+    where: { id: taskId, plan: { goal: { userId } } },
+    data: { status },
+  })
+  return result.count > 0
 }

@@ -62,3 +62,18 @@ export async function getAllGoals(userId: string) {
 export async function getTodayTasks(userId: string) {
   return goalRepository.findTodayTasks(userId)
 }
+
+const TASK_STATUSES = ['TODO', 'IN_PROGRESS', 'DONE', 'SKIPPED'] as const
+export type TaskStatusInput = (typeof TASK_STATUSES)[number]
+
+export function isTaskStatus(value: string): value is TaskStatusInput {
+  return (TASK_STATUSES as readonly string[]).includes(value)
+}
+
+export async function setTaskStatus(
+  taskId: string,
+  userId: string,
+  status: TaskStatusInput
+) {
+  return goalRepository.updateTaskStatus(taskId, userId, status)
+}

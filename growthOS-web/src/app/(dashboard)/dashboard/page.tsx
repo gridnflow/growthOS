@@ -10,11 +10,10 @@ import * as goalsService from '@/modules/goals/service'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { StatCard } from '@/components/ui/StatCard'
 import { Card } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ProgressBar } from '@/components/ui/ProgressBar'
-import { statusTone } from '@/components/ui/statusTone'
 import { formatMinutes } from '@/lib/format'
+import { TodayTaskItem } from '@/components/TodayTaskItem'
 
 export default async function DashboardPage() {
   const userId = await getCurrentUserId()
@@ -81,14 +80,14 @@ export default async function DashboardPage() {
         ) : (
           <ul className="mt-4 divide-y divide-gray-100">
             {todayTasks.map((task) => (
-              <li key={task.id} className="flex items-center gap-3 py-3">
-                <Badge tone={statusTone(task.status)}>{task.status}</Badge>
-                <span className="text-sm text-gray-900">{task.title}</span>
-                <span className="text-sm text-gray-400">· {task.estimatedMin}m</span>
-                <span className="ml-auto text-sm text-gray-400">
-                  {task.plan.goal.title}
-                </span>
-              </li>
+              <TodayTaskItem
+                key={task.id}
+                id={task.id}
+                title={task.title}
+                estimatedMin={task.estimatedMin}
+                status={task.status}
+                goalTitle={task.plan.goal.title}
+              />
             ))}
           </ul>
         )}
