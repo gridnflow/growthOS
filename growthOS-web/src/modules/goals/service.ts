@@ -55,6 +55,10 @@ export async function getGoals(userId: string) {
   return goalRepository.findGoalsByUserId(userId)
 }
 
+export async function getAllGoals(userId: string) {
+  return goalRepository.findAllGoalsByUserId(userId)
+}
+
 export async function getTodayTasks(userId: string) {
   return goalRepository.findTodayTasks(userId)
 }

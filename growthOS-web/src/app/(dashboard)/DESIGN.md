@@ -86,7 +86,7 @@
 
 ```
 ┌────────────┬──────────────────────────────────┐
-│ Sidebar    │  Topbar: 우측 <UserButton/>        │
+│ Sidebar    │  Topbar (앱 이름/빈 영역, 인증 없음) │
 │ (w-56,     ├──────────────────────────────────┤
 │  hidden    │                                  │
 │  md:flex)  │   <main className="              │
@@ -100,7 +100,7 @@
 Client 경계(최소):
 - `SidebarNav` (`'use client'`) — `usePathname()`로 활성 항목 강조. 활성: `bg-gray-100 text-gray-900 font-medium`, 비활성: `text-gray-500 hover:bg-gray-50`. nav 항목 4개:
   - Dashboard `/dashboard` · Goals `/dashboard/goals` · Sessions `/dashboard/sessions` · Content `/dashboard/content`
-- `UserButton` (Clerk, 이미 Client).
+  (인증 없음 — Topbar에 UserButton 없음. 앱 이름/빈 영역만.)
 
 모바일: 사이드바 `hidden md:flex`, 모바일은 Topbar에 가로 스크롤 탭 줄(동일 nav 항목)로 폴백.
 
@@ -271,12 +271,11 @@ Server/Client 경계:
 |------|------|
 | `(dashboard)/layout.tsx` | Server |
 | `SidebarNav` | **Client** (usePathname) |
-| `UserButton` | Client (Clerk) |
 | 4개 page.tsx | 모두 Server (데이터 패칭) |
 | `Card/StatCard/Badge/PageHeader/EmptyState/ProgressBar/SessionRow/PostCard/ReelCard` | Server(순수 표현) |
 | `ContentTabs` | **Client** (탭 state) |
 
-→ Client는 `SidebarNav`, `ContentTabs`, `UserButton` 셋뿐. 나머지 전부 Server.
+→ Client는 `SidebarNav`, `ContentTabs` 둘뿐. 나머지 전부 Server. (인증 없음 → UserButton 없음.)
 
 ---
 
@@ -290,7 +289,8 @@ Server/Client 경계:
 |--------|------|------|
 | 메인 | `analyticsService.getDashboardSummary(userId)` → `DashboardSummary` | **구현 완료**(commit 20301fa). 필드: `currentStreak, todayFocusedMin, weekFocusedMin, activeGoalsCount, overallProgressPct` |
 | 메인 | `goalsService.getTodayTasks(userId)` | 기존 존재 |
-| 메인/Goals | `goalsService.getGoals(userId)` | 기존 존재 |
+| 메인 | `goalsService.getGoals(userId)` | 기존 존재 — ACTIVE 목표만 |
+| Goals | `goalsService.getAllGoals(userId)` | 전체 목표(ACTIVE/PAUSED/COMPLETED) + 상태 배지 |
 | Sessions | `sessionsService.getRecentSessions(userId)` → `{ sessions: SessionListItem[], summary: { totalSessions, totalFocusSec } }` | **신규** — sessions 모듈 service/repository에 추가. reflection/linkedInPost/reel은 존재여부 boolean + focusScore만 `select`로 가볍게 |
 | Content | `contentService.getContentItems(userId)` → `{ posts: PostItem[], reels: ReelItem[] }` | **신규** — content 모듈 service 신설(현재 repository/types만 존재), session join |
 
@@ -301,10 +301,10 @@ Server/Client 경계:
 - **Date 객체를 Client 컴포넌트로 내리지 말 것.** page(Server)에서 `formatDate/formatDateTime/formatDuration/formatMinutes`로 string 변환 후 props 전달. 특히 `ContentTabs`(Client)에 넘기는 `PostItem`/`ReelItem`의 `createdAt`은 반드시 string화.
 - 4개 page는 모두 Server Component이므로 service를 직접 `await` 호출. (`'use client'` page 금지.)
 
-### 7-3. 유저 매핑 / 인증
+### 7-3. 유저 컨텍스트 (인증 없음 — 단일 사용자)
 
-- service들은 **내부 cuid `userId`** 를 받는다. page에서: `auth()`(`@clerk/nextjs/server`)로 `clerkId` 획득 → User 조회하여 내부 `userId`로 변환 후 service 호출.
-- clerkId→userId 매핑 헬퍼 위치는 `lib/clerk.ts` 확인(없으면 developer가 추가). 미인증 처리는 `src/middleware.ts`(이미 존재)에 의존하되, page 상단에서 user 미존재 시 방어 처리.
+- 인증 제거됨. service들은 **내부 cuid `userId`** 를 받고, page는 `lib/currentUser.ts`의 `getCurrentUserId()`로 고정 사용자(`DEFAULT_USER_EMAIL`, 기본 `seed@growthos.dev`) id를 얻어 service 호출.
+- middleware/라우트 보호 없음. page 상단에서 user 미존재 시 방어 처리(빈 상태 렌더).
 
 ### 7-4. 기타
 

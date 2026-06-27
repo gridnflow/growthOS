@@ -19,6 +19,15 @@ export async function findGoalsByUserId(userId: string) {
   })
 }
 
+// All goals regardless of status — the Goals page shows ACTIVE/PAUSED/COMPLETED
+// with a status badge, unlike the dashboard which only surfaces active goals.
+export async function findAllGoalsByUserId(userId: string) {
+  return prisma.goal.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+  })
+}
+
 export async function findGoalById(id: string) {
   return prisma.goal.findUnique({ where: { id } })
 }

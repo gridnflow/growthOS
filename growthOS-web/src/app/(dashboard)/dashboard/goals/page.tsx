@@ -36,11 +36,11 @@ function DDayBadge({ deadline }: { deadline: Date }) {
 
 export default async function GoalsPage() {
   const userId = await getCurrentUserId()
-  const goals = userId ? await goalsService.getGoals(userId) : []
+  const goals = userId ? await goalsService.getAllGoals(userId) : []
 
   return (
     <>
-      <PageHeader title="Goals" description="진행 중인 목표" action={<NewGoalButton />} />
+      <PageHeader title="Goals" description="전체 목표" action={<NewGoalButton />} />
 
       {goals.length === 0 ? (
         <EmptyState
