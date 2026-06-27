@@ -9,7 +9,19 @@ Rules:
 - Make objectives specific and measurable
 - keyResults should be 2-3 concrete outcomes
 - focusAreas should be 2-3 skill/topic areas to focus on
-- Respond ONLY with valid JSON matching the output schema`
+
+Respond ONLY with valid JSON in exactly this shape (no extra keys, no wrapping):
+{
+  "monthlyMilestones": [
+    {
+      "month": 1,
+      "objective": "string",
+      "keyResults": ["string", "string"],
+      "focusAreas": ["string", "string"]
+    }
+  ]
+}
+Create one milestone object per available month.`
 
 export async function runGoalPlannerAgent(
   input: GoalPlannerInput

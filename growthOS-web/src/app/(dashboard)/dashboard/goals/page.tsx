@@ -10,17 +10,7 @@ import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { statusTone } from '@/components/ui/statusTone'
 import { formatDate } from '@/lib/format'
-
-function NewGoalButton() {
-  return (
-    <button
-      disabled
-      className="cursor-not-allowed rounded-lg bg-black px-4 py-2 text-white opacity-50"
-    >
-      새 목표
-    </button>
-  )
-}
+import { NewGoalForm } from '@/components/NewGoalForm'
 
 function DDayBadge({ deadline }: { deadline: Date }) {
   const today = new Date()
@@ -40,13 +30,12 @@ export default async function GoalsPage() {
 
   return (
     <>
-      <PageHeader title="Goals" description="전체 목표" action={<NewGoalButton />} />
+      <PageHeader title="Goals" description="전체 목표" action={<NewGoalForm />} />
 
       {goals.length === 0 ? (
         <EmptyState
           title="아직 목표가 없습니다"
-          description="첫 목표를 등록해 보세요"
-          action={<NewGoalButton />}
+          description="목표와 마감일을 입력하면 AI가 주간·일별 task로 나눠줍니다"
         />
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
