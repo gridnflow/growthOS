@@ -3,7 +3,8 @@
 > **이 문서가 단일 정본(canonical)이다.** (DESIGN_SPEC.md는 폐기·삭제됨 — 내용은 이 문서에 흡수.)
 > design 에이전트 최종 산출물. developer가 이 문서 기준으로 구현한다.
 > content 레이아웃 = **탭**(ContentTabs Client 컴포넌트). 경로 = `/dashboard`(`app/(dashboard)/dashboard/...`).
-> 제약: Next.js 15 App Router, **Server Component 기본**, 상호작용 필요한 부분만 `'use client'`. Tailwind only(UI 라이브러리 추가 금지). 톤은 기존 landing의 흑백(`bg-black text-white`) 유지.
+> 제약: Next.js 15 App Router, **Server Component 기본**, 상호작용 필요한 부분만 `'use client'`. Tailwind only(UI 라이브러리 추가 금지).
+> **비주얼 디자인 v2 (§8)가 최신 스타일 정본이다.** §1 토큰·§2~§5의 클래스 표기는 v2(§8)로 덮어쓴다. 데이터 계약·레이아웃 구조·Server/Client 경계는 그대로, **스타일만** 갱신.
 
 ---
 
@@ -310,3 +311,124 @@ Server/Client 경계:
 
 - `line-clamp-3`은 Tailwind ^3.4 코어 유틸 → config 변경 불필요.
 - "새 목표" 버튼·태스크 체크 토글·세션 상세(`[id]`) 페이지는 모두 이 태스크(1-2) **범위 밖** — placeholder/링크만.
+
+---
+
+## 8. 비주얼 디자인 v2 — 전면 개선 (최신 정본 스타일) {#v2}
+
+> 목적: 현재 흑백 미니멀(flat, 회색 단조, 섀도우 없음)을 **세련된 프로덕트 대시보드** 수준으로 끌어올린다. 기능/데이터/Server·Client 경계는 불변, **스타일만** 교체. Tailwind 코어 유틸만 사용(플러그인/라이브러리 추가 없음). developer는 §8을 §1~§5보다 우선 적용.
+>
+> 핵심 방향 4가지: ① 절제된 **액센트 컬러(indigo)** 도입 ② **깊이**(섀도우/링 보더/표면 위계) ③ **타이포 위계 강화**(숫자가 주인공) ④ **마이크로 디테일**(hover/transition/일관 라운드). 다크모드는 범위 밖.
+
+### 8-1. 컬러 팔레트 & 토큰 (v2 — §1 대체)
+
+브랜드 액센트 = **indigo**(신뢰감 있는 보라-파랑, build-in-public 톤에 적합). 상태 색은 의미 유지하되 톤 정리.
+
+| 역할 | v1 (현재) | **v2 (적용)** |
+|------|-----------|--------------|
+| 앱 배경 | `bg-gray-50` | `bg-slate-50` (살짝 차가운 중립, 카드 흰색이 더 또렷) |
+| 카드 표면 | `bg-white border border-gray-200 rounded-xl p-6` | `bg-white rounded-2xl border border-slate-200/70 shadow-sm` (라운드 ↑, 섀도우 추가, 보더 연하게) |
+| 카드 hover(링크형) | — | `transition hover:shadow-md hover:border-slate-300` |
+| 액센트(브랜드) | — | indigo: `bg-indigo-600 hover:bg-indigo-700 text-white` / 텍스트 `text-indigo-600` / 연한 면 `bg-indigo-50 text-indigo-700` |
+| 주요 텍스트 | `text-gray-900` | `text-slate-900` |
+| 보조 텍스트 | `text-gray-500` | `text-slate-500` |
+| 미세 텍스트(footer/메타) | `text-gray-400` | `text-slate-400` |
+| 액션 버튼(주) | `bg-black hover:bg-gray-800` | `bg-indigo-600 hover:bg-indigo-700 shadow-sm transition` |
+| 액션 버튼(보조) | — | `bg-white border border-slate-200 text-slate-700 hover:bg-slate-50` |
+| 섹션 라벨 | `text-sm font-medium text-gray-500` | `text-xs font-semibold uppercase tracking-wider text-slate-400` (라벨답게 작고 또렷) |
+| 큰 숫자(통계) | `text-3xl font-bold text-gray-900` | `text-4xl font-bold tracking-tight text-slate-900 tabular-nums` (더 크게, 숫자 정렬) |
+| 라운드 표준 | `rounded-xl` | 카드 `rounded-2xl`, 칩/버튼 `rounded-lg`, 배지 `rounded-full` |
+| 그리드 간격 | `gap-6` | `gap-5` (카드 자체 패딩이 커서 약간 좁혀 밀도 확보) |
+| 카드 패딩 | `p-6` | `p-5 sm:p-6` |
+
+> Tailwind 색 계열은 `gray`→`slate`로 통일(전 컴포넌트). 액센트는 `indigo`만 추가. 다른 색 난립 금지.
+
+상태 톤(Badge, v2): 텍스트+연한 배경 + **링 보더**로 입체감. 점(dot) 옵션 추가.
+
+| tone | v2 클래스 | 사용처 |
+|------|-----------|--------|
+| `positive` | `text-emerald-700 bg-emerald-50 ring-1 ring-inset ring-emerald-600/20` | DONE/ACTIVE/READY/PUBLISHED/스트릭 활성 |
+| `progress` | `text-amber-700 bg-amber-50 ring-1 ring-inset ring-amber-600/20` | IN_PROGRESS/PROCESSING |
+| `neutral` | `text-slate-600 bg-slate-100 ring-1 ring-inset ring-slate-500/15` | TODO/DRAFT/PENDING/PAUSED |
+| `warn` | `text-rose-700 bg-rose-50 ring-1 ring-inset ring-rose-600/20` | SKIPPED/Overdue |
+| `accent` (신규) | `text-indigo-700 bg-indigo-50 ring-1 ring-inset ring-indigo-600/20` | 강조용(예: musicMood, 활성 탭 카운트) |
+
+### 8-2. 타이포 스케일
+
+| 용도 | 클래스 |
+|------|--------|
+| 페이지 제목(H1) | `text-2xl font-bold tracking-tight text-slate-900` |
+| 카드 제목/목표명 | `text-base font-semibold text-slate-900` |
+| 통계 숫자 | `text-4xl font-bold tracking-tight tabular-nums` |
+| 섹션 라벨 | `text-xs font-semibold uppercase tracking-wider text-slate-400` |
+| 본문 | `text-sm text-slate-600` |
+| 메타/footer | `text-xs text-slate-400` |
+
+### 8-3. 공통 컴포넌트 before → after
+
+각 컴포넌트의 **방향**만 명확히 — developer가 클래스 적용. 구조/props 불변.
+
+**`Card`**
+- before: `bg-white border border-gray-200 rounded-xl p-6`
+- after: `bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5 sm:p-6`
+- 추가 prop(선택) `interactive?: boolean` → true면 `transition hover:shadow-md hover:border-slate-300` 부여(링크형 카드: goal/post/reel).
+
+**`StatCard`** (가장 큰 인상 변화 포인트)
+- before: 라벨(회색) + `text-3xl` 숫자, 평면.
+- after:
+  - 상단 행: 섹션 라벨(`text-xs uppercase tracking-wider text-slate-400`) + **우상단 아이콘 칩**(아이콘은 inline SVG 또는 이모지, `h-9 w-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center`).
+  - 숫자: `text-4xl font-bold tracking-tight tabular-nums`. `sub`는 `text-base font-medium text-slate-400 ml-1`.
+  - `emphasis`(스트릭 활성): 숫자색 `text-emerald-600` 유지하되, 아이콘 칩도 `bg-emerald-50 text-emerald-600`로 동조.
+  - 카드별 아이콘 권장: Streak=🔥(또는 flame svg), Progress=상승 차트, Today's Focus=시계.
+  - `children`(ProgressBar 등)은 숫자 아래 `mt-4`.
+
+**`Badge`**
+- before: `bg-*-50 text-*-700` 평면.
+- after: §8-1 v2 톤 표(ring-inset 보더). 옵션 `withDot?: boolean` → 앞에 `<span className="mr-1 h-1.5 w-1.5 rounded-full bg-current opacity-70" />`. 사이즈 `px-2 py-0.5 text-xs font-medium`.
+
+**`PageHeader`**
+- before: H1 + 설명, 평면.
+- after: H1 `text-2xl font-bold tracking-tight`, 설명 `text-sm text-slate-500`. 하단에 `border-b border-slate-200/70 pb-5 mb-6`로 헤더와 콘텐츠 구분선 추가(여백·위계↑). action 버튼은 v2 주/보조 버튼 스타일.
+
+**`EmptyState`** (밋밋함 탈피)
+- before: 점선 박스 + 텍스트.
+- after: `rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-16 px-6 text-center`. 상단에 **아이콘 원형**(`mx-auto mb-4 h-12 w-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center` + 아이콘) → 선택 prop `icon?: ReactNode`. 제목 `text-slate-900 font-semibold`, 설명 `text-sm text-slate-500`, action은 `mt-5` indigo 버튼.
+
+**`ProgressBar`**
+- before: 트랙 `bg-gray-100`, 채움 `bg-black`.
+- after: 트랙 `bg-slate-100`, 채움 `bg-gradient-to-r from-indigo-500 to-indigo-600 transition-[width] duration-500`. 높이 `h-2 rounded-full`. (그라데이션으로 생기 부여, width 트랜지션.)
+
+**`SessionRow`** (리스트 한 행)
+- before: 평면 텍스트 3열 + 칩.
+- after: `flex items-center gap-4 px-5 py-4 transition hover:bg-slate-50 first:rounded-t-2xl last:rounded-b-2xl`. 좌측에 **목표 머리글자 아바타**(`h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 font-semibold flex items-center justify-center`, goal.title 첫 글자). 날짜=`text-sm font-medium text-slate-900`, goal=`text-xs text-slate-400`. duration/focus는 가운데 `text-sm text-slate-600 tabular-nums`. 우측 AI 칩 3개는 Badge(있으면 positive, 없으면 아예 숨기거나 아주 연한 neutral 점). 행 전체가 Link → `group` + 우측 chevron(`text-slate-300 group-hover:text-slate-400`).
+
+**`PostCard` / `ReelCard`**
+- before: 평면 카드, 텍스트 나열.
+- after: `Card interactive`. 상단 행: status Badge + (우측) 날짜 메타. hook/hookText `text-base font-semibold text-slate-900 leading-snug`. 본문 `text-sm text-slate-600 line-clamp-3 mt-2`. hashtags(Post)는 각 태그를 작은 칩(`inline-flex rounded-md bg-slate-100 text-slate-500 text-xs px-2 py-0.5`)으로 → 단순 텍스트보다 정돈. ReelCard meta 행: 시간/overlays는 `text-xs text-slate-500` + musicMood는 `accent` Badge. footer 구분선 `border-t border-slate-100 mt-4 pt-3` 위에 `{goalTitle} · {date}`.
+
+### 8-4. 셸(layout) 개선
+
+- 사이드바: `bg-white border-r border-slate-200`. 로고 영역 — "GrowthOS"에 액센트(예: "Growth" `text-slate-900` + "OS" `text-indigo-600`, 또는 앞에 작은 indigo 라운드 마크). 로고 아래 `border-b border-slate-100` 구분.
+- `SidebarNav` 항목: `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition`. **각 항목 앞 아이콘**(inline SVG, 16–18px) 추가 → 시각 인지성↑. 활성: `bg-indigo-50 text-indigo-700 font-semibold`(+ 좌측 액센트 바 또는 아이콘 indigo). 비활성: `text-slate-600 hover:bg-slate-50 hover:text-slate-900`.
+- Topbar(데스크탑): 현재 비어있음(인증 없음). 제거하거나, 페이지 제목을 셸 topbar로 올리지 말고 각 페이지 PageHeader 유지(중복 방지). 모바일 상단 nav 바는 `bg-white/80 backdrop-blur border-b border-slate-200`로 살짝 고급스럽게.
+- 메인 영역 배경 `bg-slate-50`, 콘텐츠 `mx-auto max-w-6xl px-6 sm:px-8 py-8`.
+
+> 아이콘: 라이브러리 추가 금지 제약 → **inline SVG**(작은 path 직접 작성) 또는 이모지로 처리. lucide/heroicons 등 설치하지 말 것. developer가 부담되면 이모지로 먼저 가도 OK(🔥📈⏱️ 등), 단 StatCard/EmptyState/Nav는 시각 포인트라 가능하면 SVG 권장.
+
+### 8-5. 페이지별 개선 포인트
+
+- **메인 대시보드**: 통계 3카드가 첫인상 → §8-3 StatCard 적용(아이콘 칩 + 큰 숫자 + 스트릭 강조). "Today's Tasks" 카드 제목을 섹션 라벨 스타일로, 각 task 행은 hover 배경 + status 점 배지. 카드 사이 `gap-5`, 통계행과 할일카드 사이 `mt-6`.
+- **Goals**: goal 카드를 `interactive`로(hover 부각). 좌측 상단에 목표 머리글자 아바타(SessionRow와 동일 패턴, 일관성). D-day를 우상단 강조 칩으로, 진행 상태가 있으면 미니 ProgressBar 추가 고려(데이터 있을 때만).
+- **Sessions**: 단조로운 리스트 → 아바타 + hover + chevron(§8-3 SessionRow). 상단 인라인 요약을 작은 통계 칩 2개(`총 N세션` / `총 집중시간`)로 살짝 시각화(StatCard만큼 크지 않게, `inline-flex` 칩).
+- **Content**: 탭 바를 v2로 — 활성 탭 `text-indigo-600 border-indigo-600`, 카운트는 `accent` Badge. 카드 그리드 `gap-5`. Post/Reel 카드 §8-3 적용.
+
+### 8-6. 마이크로 디테일 체크리스트 (developer 적용 항목)
+
+- 모든 클릭 가능한 표면: `transition`(기본 150ms) + hover 상태 명시.
+- 라운드 일관: 카드 `rounded-2xl`, 버튼/칩 `rounded-lg`, 배지/아바타원 `rounded-full`/`rounded-xl`.
+- 섀도우 일관: 평상 `shadow-sm`, hover `shadow-md`. 그 이상 강한 섀도우 지양.
+- 숫자에 `tabular-nums`(통계/시간/카운트) → 정렬 안정.
+- 포커스 접근성: 인터랙티브 요소에 `focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2`.
+- 색 계열 `slate`로 통일, 액센트는 `indigo`만. 임의 색 추가 금지.
+
+> 이 §8은 **스타일 가이드**다. props/데이터/컴포넌트 분리/Server·Client 경계는 §2~§7 그대로. developer는 클래스만 교체/추가하면 된다. 새 옵션 prop(`Card.interactive`, `Badge.withDot`, `StatCard.icon`, `EmptyState.icon`)은 기존 호출부 영향 없도록 모두 선택적.
