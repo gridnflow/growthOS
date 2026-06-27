@@ -21,10 +21,16 @@ export function registerIpcHandlers(): void {
   })
 
   // desktopCapturer is a main-process API; expose the screen source id to the
-  // renderer so it can feed getUserMedia and record with MediaRecorder.
+  // renderer so it can feed getUserMedia and record with MediaRecorder. Returns
+  // null (rather than throwing) when Screen Recording permission is missing, so
+  // a session can still start and track activity without a recording.
   ipcMain.handle('recorder:get-source-id', async () => {
-    const sources = await desktopCapturer.getSources({ types: ['screen'] })
-    return sources[0]?.id ?? null
+    try {
+      const sources = await desktopCapturer.getSources({ types: ['screen'] })
+      return sources[0]?.id ?? null
+    } catch {
+      return null
+    }
   })
 
   // Renderer streams 5s MediaRecorder chunks back here for crash-safe writes.

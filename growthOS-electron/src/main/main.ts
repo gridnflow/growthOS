@@ -7,10 +7,13 @@ let trayWindow: BrowserWindow | null = null
 
 function createTrayWindow(): BrowserWindow {
   const win = new BrowserWindow({
-    width: 320,
-    height: 480,
-    show: false,
-    frame: false,
+    width: 360,
+    height: 520,
+    // Show on launch with a normal frame: the empty-icon menu-bar tray is
+    // unreliable on recent macOS, so we surface the window directly. The tray
+    // still toggles it once it exists.
+    show: true,
+    frame: true,
     resizable: false,
     webPreferences: {
       nodeIntegration: false,
@@ -46,50 +49,66 @@ function createTray(win: BrowserWindow): Tray {
   })
 
   t.setContextMenu(
-    Menu.buildFromTemplate([{ label: 'Quit GrowthOS', click: () => app.quit() }])
+    Menu.buildFromTemplate([
+      { label: 'Open Screen Recording Settings', click: openScreenRecordingSettings },
+      { type: 'separator' },
+      { label: 'Quit GrowthOS', click: () => app.quit() },
+    ])
   )
 
   return t
 }
 
 // The tracker needs two macOS permissions: Screen Recording (desktopCapturer)
-// and Accessibility (active-win). Neither can be toggled programmatically, and
-// macOS only lists an app under a permission once the app actually exercises
-// the protected API — so we trigger both on launch, then deep-link to Settings.
+// and Accessibility (active-win). macOS only lists an app under a permission
+// once it actually exercises the protected API, so we touch both on launch to
+// register the app — but we do NOT auto-open Settings (that popped a window on
+// every launch while screen stayed denied). Use the tray menu to open Settings.
 async function ensureMacPermissions(): Promise<void> {
   if (process.platform !== 'darwin') return
 
-  // Screen Recording: actually call desktopCapturer so macOS registers the app
-  // and shows its prompt. getMediaAccessStatus only reports state; it does not
-  // register the app on its own.
+  // Screen Recording: a real frame grab (non-zero thumbnail) registers the app
+  // under the permission. No-op once granted.
   if (systemPreferences.getMediaAccessStatus('screen') !== 'granted') {
     try {
-      await desktopCapturer.getSources({ types: ['screen'] })
+      await desktopCapturer.getSources({
+        types: ['screen'],
+        thumbnailSize: { width: 1, height: 1 },
+      })
     } catch {
       // expected to fail/return empty until granted
     }
-    shell.openExternal(
-      'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture'
-    )
   }
 
-  // Accessibility: prompt = true makes macOS register the app and show the
-  // "open Settings" dialog.
-  if (!systemPreferences.isTrustedAccessibilityClient(true)) {
-    shell.openExternal(
-      'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'
-    )
+  // Accessibility: prompt only if not already trusted, so we don't nag once on.
+  if (!systemPreferences.isTrustedAccessibilityClient(false)) {
+    systemPreferences.isTrustedAccessibilityClient(true)
   }
 }
 
+function openScreenRecordingSettings(): void {
+  shell.openExternal(
+    'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture'
+  )
+}
+
 app.whenReady().then(() => {
-  // macOS: hide from dock — this is a background tracking agent
-  if (process.platform === 'darwin') app.dock.hide()
+  if (process.platform === 'darwin') {
+    console.log('[perm] screen =', systemPreferences.getMediaAccessStatus('screen'))
+    console.log('[perm] accessibility =', systemPreferences.isTrustedAccessibilityClient(false))
+  }
 
   void ensureMacPermissions()
 
   trayWindow = createTrayWindow()
   tray = createTray(trayWindow)
+
+  // Bring the window to the front on launch so it is reachable without the
+  // menu-bar tray (which is unreliable with an empty icon on recent macOS).
+  if (process.platform === 'darwin') app.dock.show()
+  trayWindow.show()
+  trayWindow.focus()
+  app.focus({ steal: true })
 
   registerIpcHandlers()
 })

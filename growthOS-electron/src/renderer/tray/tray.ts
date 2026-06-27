@@ -17,9 +17,12 @@ declare global {
 let mediaRecorder: MediaRecorder | null = null
 let captureStream: MediaStream | null = null
 
-async function startRecording(): Promise<void> {
+// Returns true if recording started. Returns false (without throwing) when
+// Screen Recording permission is missing — the session still runs, just without
+// a video.
+async function startRecording(): Promise<boolean> {
   const sourceId = await window.api.getScreenSourceId()
-  if (!sourceId) throw new Error('No screen source available')
+  if (!sourceId) return false
 
   // chromeMediaSource constraints are the Electron-specific way to target a
   // desktopCapturer source through getUserMedia.
@@ -38,6 +41,7 @@ async function startRecording(): Promise<void> {
     await window.api.writeChunk(buffer, Date.now())
   }
   mediaRecorder.start(5000) // emit a chunk every 5s
+  return true
 }
 
 function stopRecording(): void {
@@ -91,13 +95,15 @@ startBtn.addEventListener('click', async () => {
 
   try {
     await window.api.startSession(POC_GOAL_ID)
-    await startRecording()
+    // Recording is best-effort: a missing Screen Recording permission must not
+    // block the session (activity tracking + AI pipeline still run).
+    const recording = await startRecording().catch(() => false)
     startBtn.style.display = 'none'
     stopBtn.style.display = 'block'
-    statusEl.textContent = 'Session active'
+    statusEl.textContent = recording ? 'Session active' : 'Session active (no recording)'
     startTimer()
-  } catch {
-    statusEl.textContent = 'Failed to start'
+  } catch (err) {
+    statusEl.textContent = 'Failed: ' + (err instanceof Error ? err.message : String(err))
     startBtn.disabled = false
   }
 })
