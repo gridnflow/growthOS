@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, nativeImage, Menu } from 'electron'
+import { app, BrowserWindow, Tray, nativeImage, Menu, systemPreferences, shell } from 'electron'
 import path from 'path'
 import { registerIpcHandlers } from './ipcHandlers'
 
@@ -49,9 +49,35 @@ function createTray(win: BrowserWindow): Tray {
   return t
 }
 
+// The tracker needs two macOS permissions: Screen Recording (desktopCapturer)
+// and Accessibility (active-win). Neither can be toggled programmatically — we
+// trigger the system prompt where possible and deep-link to Settings otherwise.
+function ensureMacPermissions(): void {
+  if (process.platform !== 'darwin') return
+
+  // Screen Recording: getMediaAccessStatus shows current state; first
+  // desktopCapturer use surfaces the system prompt. Open Settings if denied.
+  const screenStatus = systemPreferences.getMediaAccessStatus('screen')
+  if (screenStatus !== 'granted') {
+    shell.openExternal(
+      'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture'
+    )
+  }
+
+  // Accessibility: prompt = true makes macOS show the "open Settings" dialog.
+  const hasAccessibility = systemPreferences.isTrustedAccessibilityClient(true)
+  if (!hasAccessibility) {
+    shell.openExternal(
+      'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'
+    )
+  }
+}
+
 app.whenReady().then(() => {
   // macOS: hide from dock — this is a background tracking agent
   if (process.platform === 'darwin') app.dock.hide()
+
+  ensureMacPermissions()
 
   trayWindow = createTrayWindow()
   tray = createTray(trayWindow)

@@ -5,8 +5,46 @@ declare global {
       stopSession: () => Promise<void>
       getSessionStatus: () => Promise<{ isRecording: boolean; sessionId: string | null; startedAt: string | null }>
       getTodayTasks: () => Promise<Array<{ id: string; title: string; status: string }>>
+      getScreenSourceId: () => Promise<string | null>
+      writeChunk: (buffer: ArrayBuffer, timestamp: number) => Promise<string>
     }
   }
+}
+
+// MediaRecorder lives in the renderer; desktopCapturer (main) hands us the
+// screen source id, we capture it, and stream 5s chunks back to main for
+// crash-safe disk writes.
+let mediaRecorder: MediaRecorder | null = null
+let captureStream: MediaStream | null = null
+
+async function startRecording(): Promise<void> {
+  const sourceId = await window.api.getScreenSourceId()
+  if (!sourceId) throw new Error('No screen source available')
+
+  // chromeMediaSource constraints are the Electron-specific way to target a
+  // desktopCapturer source through getUserMedia.
+  captureStream = await navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: {
+      // @ts-expect-error — Electron desktopCapturer constraints are non-standard
+      mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: sourceId },
+    },
+  })
+
+  mediaRecorder = new MediaRecorder(captureStream, { mimeType: 'video/webm;codecs=vp8' })
+  mediaRecorder.ondataavailable = async (e) => {
+    if (e.data.size === 0) return
+    const buffer = await e.data.arrayBuffer()
+    await window.api.writeChunk(buffer, Date.now())
+  }
+  mediaRecorder.start(5000) // emit a chunk every 5s
+}
+
+function stopRecording(): void {
+  mediaRecorder?.stop()
+  captureStream?.getTracks().forEach((t) => t.stop())
+  mediaRecorder = null
+  captureStream = null
 }
 
 const statusEl = document.getElementById('status')!
@@ -53,6 +91,7 @@ startBtn.addEventListener('click', async () => {
 
   try {
     await window.api.startSession(POC_GOAL_ID)
+    await startRecording()
     startBtn.style.display = 'none'
     stopBtn.style.display = 'block'
     statusEl.textContent = 'Session active'
@@ -68,6 +107,7 @@ stopBtn.addEventListener('click', async () => {
   statusEl.textContent = 'Processing...'
 
   try {
+    stopRecording()
     await window.api.stopSession()
     stopBtn.style.display = 'none'
     startBtn.style.display = 'block'
