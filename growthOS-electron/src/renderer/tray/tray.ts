@@ -19,7 +19,7 @@ let timerInterval: number | null = null
 let sessionStart: Date | null = null
 
 // Hardcoded goalId for POC — will be replaced with goal selector
-const POC_GOAL_ID = 'poc-goal-id'
+const POC_GOAL_ID = 'seed_goal_id'
 
 function formatDuration(ms: number): string {
   const totalSec = Math.floor(ms / 1000)
