@@ -100,7 +100,7 @@ app.whenReady().then(() => {
 
   // Bring the window to the front on launch so it is reachable without the
   // menu-bar tray (which is unreliable with an empty icon on recent macOS).
-  if (process.platform === 'darwin') app.dock.show()
+  // App is LSUIElement (no dock icon); showing+focusing the window is enough.
   trayWindow.show()
   trayWindow.focus()
   app.focus({ steal: true })
