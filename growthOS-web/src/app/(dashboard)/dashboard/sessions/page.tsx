@@ -5,7 +5,6 @@ import * as sessionsService from '@/modules/sessions/service'
 export const dynamic = 'force-dynamic'
 
 import { PageHeader } from '@/components/ui/PageHeader'
-import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { SessionRow } from '@/components/ui/SessionRow'
 import type { SessionRowView } from '@/components/ui/SessionRow'
@@ -40,14 +39,25 @@ export default async function SessionsPage() {
         />
       ) : (
         <>
-          <p className="mb-4 text-sm text-gray-500">
-            {summary.totalSessions} sessions · {formatDuration(summary.totalFocusSec)} focused
-          </p>
-          <Card className="divide-y divide-gray-100 p-0">
+          <div className="mb-5 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200/70">
+              <span className="font-semibold tabular-nums text-slate-900">
+                {summary.totalSessions}
+              </span>
+              sessions
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200/70">
+              <span className="font-semibold tabular-nums text-slate-900">
+                {formatDuration(summary.totalFocusSec)}
+              </span>
+              focused
+            </span>
+          </div>
+          <div className="divide-y divide-slate-100 rounded-2xl border border-slate-200/70 bg-white shadow-sm">
             {rows.map((row) => (
               <SessionRow key={row.id} session={row} />
             ))}
-          </Card>
+          </div>
         </>
       )}
     </>

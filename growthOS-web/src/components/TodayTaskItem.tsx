@@ -43,27 +43,29 @@ export function TodayTaskItem({ id, title, estimatedMin, status, goalTitle }: Pr
   const skipped = current === 'SKIPPED'
 
   return (
-    <li className="flex items-center gap-3 py-3">
-      <Badge tone={statusTone(current)}>{current}</Badge>
+    <li className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition hover:bg-slate-50">
+      <Badge tone={statusTone(current)} withDot>
+        {current}
+      </Badge>
       <span
-        className={`text-sm ${done || skipped ? 'text-gray-400 line-through' : 'text-gray-900'}`}
+        className={`text-sm ${done || skipped ? 'text-slate-400 line-through' : 'text-slate-900'}`}
       >
         {title}
       </span>
-      <span className="text-sm text-gray-400">· {estimatedMin}m</span>
+      <span className="text-sm tabular-nums text-slate-400">· {estimatedMin}m</span>
       <span className="ml-auto flex items-center gap-2">
-        <span className="hidden text-sm text-gray-400 sm:inline">{goalTitle}</span>
+        <span className="hidden text-sm text-slate-400 sm:inline">{goalTitle}</span>
         <button
           onClick={() => update(done ? 'TODO' : 'DONE')}
           disabled={pending}
-          className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-700 transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50"
         >
           {done ? '되돌리기' : '완료'}
         </button>
         <button
           onClick={() => update(skipped ? 'TODO' : 'SKIPPED')}
           disabled={pending}
-          className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-500 transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50"
         >
           {skipped ? '되돌리기' : '스킵'}
         </button>

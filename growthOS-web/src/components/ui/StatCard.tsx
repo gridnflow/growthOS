@@ -6,22 +6,39 @@ export function StatCard({
   value,
   sub,
   emphasis = false,
+  icon,
   children,
 }: {
   label: string
   value: string | number
   sub?: string
   emphasis?: boolean
+  icon?: ReactNode
   children?: ReactNode
 }) {
   return (
     <Card>
-      <p className="text-sm font-medium text-gray-500">{label}</p>
+      <div className="flex items-start justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          {label}
+        </p>
+        {icon && (
+          <span
+            className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+              emphasis ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600'
+            }`}
+          >
+            {icon}
+          </span>
+        )}
+      </div>
       <p
-        className={`mt-2 text-3xl font-bold ${emphasis ? 'text-emerald-600' : 'text-gray-900'}`}
+        className={`mt-3 text-4xl font-bold tracking-tight tabular-nums ${
+          emphasis ? 'text-emerald-600' : 'text-slate-900'
+        }`}
       >
         {value}
-        {sub && <span className="ml-1 text-base font-normal text-gray-400">{sub}</span>}
+        {sub && <span className="ml-1 text-base font-medium text-slate-400">{sub}</span>}
       </p>
       {children}
     </Card>

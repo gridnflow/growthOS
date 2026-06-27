@@ -6,6 +6,7 @@ import type { PostCardView } from '@/components/ui/PostCard'
 import { ReelCard } from '@/components/ui/ReelCard'
 import type { ReelCardView } from '@/components/ui/ReelCard'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Badge } from '@/components/ui/Badge'
 
 type Tab = 'posts' | 'reels'
 
@@ -20,12 +21,12 @@ export function ContentTabs({
 
   return (
     <div>
-      <div className="mb-6 flex gap-6 border-b border-gray-200">
+      <div className="mb-6 flex gap-6 border-b border-slate-200">
         <TabButton active={tab === 'posts'} onClick={() => setTab('posts')}>
-          LinkedIn Posts ({posts.length})
+          LinkedIn Posts <Badge tone="accent">{posts.length}</Badge>
         </TabButton>
         <TabButton active={tab === 'reels'} onClick={() => setTab('reels')}>
-          Reels ({reels.length})
+          Reels <Badge tone="accent">{reels.length}</Badge>
         </TabButton>
       </div>
 
@@ -33,7 +34,7 @@ export function ContentTabs({
         posts.length === 0 ? (
           <EmptyState title="아직 생성된 포스트가 없습니다" />
         ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             {posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
@@ -42,7 +43,7 @@ export function ContentTabs({
       ) : reels.length === 0 ? (
         <EmptyState title="아직 생성된 릴스가 없습니다" />
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {reels.map((reel) => (
             <ReelCard key={reel.id} reel={reel} />
           ))}
@@ -64,10 +65,10 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`-mb-px border-b-2 px-1 py-3 text-sm ${
+      className={`-mb-px inline-flex items-center gap-2 border-b-2 px-1 py-3 text-sm transition ${
         active
-          ? 'border-black text-gray-900'
-          : 'border-transparent text-gray-500 hover:text-gray-700'
+          ? 'border-indigo-600 font-medium text-indigo-600'
+          : 'border-transparent text-slate-500 hover:text-slate-700'
       }`}
     >
       {children}
